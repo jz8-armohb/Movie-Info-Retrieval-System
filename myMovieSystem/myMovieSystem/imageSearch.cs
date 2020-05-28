@@ -54,12 +54,12 @@ namespace myMovieSystem
         {
             int[] imgOrder = new int[100];
             int n = 0;
-            string sql = "select imginfo from moviedb";
+            string sql = "select imginfo from movieinfo";
             MySqlConnection conn = new MySqlConnection(Conn);
             conn.Open();
             MySqlCommand cmd = new MySqlCommand(sql, conn);
             MySqlDataReader reader = cmd.ExecuteReader();
-            while (reader.Read() != 0)
+            while (reader.Read())
             {
                 imgOrder[n++] = compare(reader["imginfo"].ToString(), upGray);  // imgOrder数组中存放灰度值相同的count
             }

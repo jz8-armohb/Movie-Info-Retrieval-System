@@ -182,8 +182,8 @@ namespace myMovieSystem
             try
             {
                 imageSearch imgSearch = new imageSearch();
-                string upGray = imgSearch.getGray(image.Text);//获取上载图像的灰度值
-                int[] imgOrder = imgSearch.searchResult(upGray);//获取与数据库中图像的比较结果
+                string upGray = imgSearch.getGray(image.Text);  // 获取上载图像的灰度值
+                int[] imgOrder = imgSearch.searchResult(upGray);    // 获取与数据库中图像的比较结果
                 count = 0; n = 0;
                 string sql = "select * from movieinfo";
                 getMovieInfo = new string[100, 7];//初始化数组

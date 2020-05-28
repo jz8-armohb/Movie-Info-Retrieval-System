@@ -67,22 +67,23 @@ namespace myMovieSystem
         {
             try
             {
-                string movieName = nameBox.Text;       //添加获取电影名称的代码
-                string startTime = timeBox.Text;        //添加获取上映时间的代码
-                string director = directorBox.Text;     //添加获取导演的代码
-                string actors = actorBox.Text;          //添加获取演员的代码
-                string introduction = introBox.Text;    //添加获取简介的代码
+                string movieName = nameBox.Text;        // 添加获取电影名称的代码
+                string startTime = timeBox.Text;        // 添加获取上映时间的代码
+                string director = directorBox.Text;     // 添加获取导演的代码
+                string actors = actorBox.Text;          // 添加获取演员的代码
+                string introduction = introBox.Text;    // 添加获取简介的代码
 
                 string[] newPath = new string[2];
-                newPath = copyPM();//将上载的文件复制到指定路径下，并返回路径
+                newPath = copyPM(); // 将上载的文件复制到指定路径下，并返回路径
 
-                //预留接口，为上载图像信息做准备
-                //string imgInfo = ?? 添加代码，使获取图像的灰度信息
+                /* 预留接口，为上载图像信息做准备 */
+                imageSearch imgSch = new imageSearch();
+                string imgInfo = imgSch.getGray(newPath[0]); // 获取图像的灰度信息
 
                 MySqlConnection conn = new MySqlConnection(Conn);
                 conn.Open();
-                string sql = "insert into movieinfo(moviename, time, director, actor, content, posterpath, moviepath) " +
-                    "value('" + movieName + "', '" + startTime + "', '" + director + "', '" + actors + "', '" + introduction + "', '" + newPath[0] + "', '" + newPath[1] + "')";  // 插入新信息的SQL
+                string sql = "insert into movieinfo(moviename, time, director, actor, content, posterpath, moviepath, imginfo) " +
+                    "value('" + movieName + "', '" + startTime + "', '" + director + "', '" + actors + "', '" + introduction + "', '" + newPath[0] + "', '" + newPath[1] + "', '" + imgInfo + "')";  // 插入新信息的SQL
                 MySqlCommand cmd = new MySqlCommand(sql, conn);
                 cmd.ExecuteNonQuery();
                 System.Windows.MessageBox.Show("上载成功！");

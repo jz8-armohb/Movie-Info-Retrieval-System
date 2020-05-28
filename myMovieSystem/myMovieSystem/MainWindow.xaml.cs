@@ -71,9 +71,9 @@ namespace myMovieSystem
                 connection.Close();//连接打开之后也要记得关闭
 
             }
-            catch
+            catch(Exception ex)
             {
-                MessageBox.Show("连接数据库失败");
+                MessageBox.Show(ex.Message, "连接数据库失败");
                 return;
             }
         }
