@@ -118,7 +118,7 @@ namespace myMovieSystem
             {
                 for (int j = 0; j < width; j++)
                 {
-                    pxColour = currentBitmap.GetPixel(i, j); // 获取当前像素的颜色值
+                    pxColour = currentBitmap.GetPixel(j, i); // 获取当前像素的颜色值（注意是j,i不是i,j）
                     int pxValue = (int)(pxColour.R * 0.299 + pxColour.G * 0.587 + pxColour.B * 0.114);    // Y分量
                     if (pxValue > 255)  // 溢出处理
                         pxValue = 255;
@@ -180,6 +180,70 @@ namespace myMovieSystem
 
             string fpStr = string.Join(",", fingerprint);   // 将fingerprint以逗号作为分隔符，排列成字符串
             return fpStr;
+        }
+
+        public int HashFpSimilarity(string dbImgHashFp, string upImgHashFp)
+        {
+            int hammingDist = 0;
+            string[] dbHashFp = dbImgHashFp.Split(',');
+            string[] upHashFp = upImgHashFp.Split(',');
+            for (int i = 0; i < 64; i++)
+            {
+                if (dbHashFp[i] == upHashFp[i])
+                {
+                    hammingDist++;
+                }
+            }
+
+            return hammingDist;
+        }
+
+        public int[] HashSearchResult(string upHashFp)
+        {
+            int[] imgOrder = new int[100];  // 最多比较100张图
+            int n = 0;
+            string sql = "select imginfo from movieinfo";
+            MySqlConnection conn = new MySqlConnection(Conn);
+            conn.Open();
+            MySqlCommand cmd = new MySqlCommand(sql, conn);
+            MySqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                imgOrder[n++] = HashFpSimilarity(reader["imginfo"].ToString(), upHashFp);  // imgOrder数组中存放上载图像与数据库中各个图像间的汉明距离
+            }
+            reader.Close();
+            int[] index = SortByHashSimilarity(imgOrder);   // 调用自定义排序方法
+            return index;
+        }
+
+        private int[] SortByHashSimilarity(int[] imgOrder)
+        {
+            int imgNum = imgOrder.Length;
+            int[] index = new int[imgNum]; // index[0]中存储相似度最高的图片序号
+            int temp;
+
+            for (int i = 0; i < imgNum; i++)
+            {
+                index[i] = i;   // 用于存储下标
+            }
+
+            for (int i = 0; i < imgNum; i++)
+                for (int j = 0; j < imgNum - i - 1; j++)   // 降序排序
+                {
+                    if (imgOrder[j] < imgOrder[j + 1])
+                    {
+                        // 交换数值
+                        temp = imgOrder[j];
+                        imgOrder[j] = imgOrder[j + 1];
+                        imgOrder[j + 1] = temp;
+
+                        // 交换下标
+                        temp = index[j];
+                        index[j] = index[j + 1];
+                        index[j + 1] = temp;
+                    }
+                }
+            return index;
         }
     }
 }
