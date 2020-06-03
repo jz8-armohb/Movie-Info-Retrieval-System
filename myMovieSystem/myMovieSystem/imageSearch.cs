@@ -96,5 +96,90 @@ namespace myMovieSystem
                 }
             return index;
         }
+
+
+        /***************** dHash (added by S.Z.Zheng) *****************/
+        public string dHashFingerprint(string filename)
+        {
+            Bitmap currentBitmap = (Bitmap)Image.FromFile(filename);
+            int width = currentBitmap.Width;    // 获取图像宽
+            int height = currentBitmap.Height;  // 获取图像高
+            Color pxColour;
+            byte[] grey = new byte[width * height]; // 存储图像灰度值
+            //int grey_avr = 0;   // 图像平均灰度值
+            double sampFactorW = width / 8;    // 水平方向下采样因子
+            double sampFactorH = height / 9;   // 垂直方向下采样因子
+            int[] thumb = new int[9 * 8];   // 9x8的缩略图
+            int[] dMatrix = new int[8 * 8]; // 差分矩阵
+            byte[] fingerprint = new byte[8 * 8];
+
+            /* 将图像转换为灰度图像 */
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    pxColour = currentBitmap.GetPixel(i, j); // 获取当前像素的颜色值
+                    int pxValue = (int)(pxColour.R * 0.299 + pxColour.G * 0.587 + pxColour.B * 0.114);    // Y分量
+                    if (pxValue > 255)  // 溢出处理
+                        pxValue = 255;
+                    if (pxValue < 0) 
+                        pxValue = 0;
+                    grey[i * width + j] = (byte)pxValue;
+                    //grey_avr += pxValue;
+                }
+            }
+            //grey_avr /= (width * height);
+
+            /* 生成缩略图 */
+            for (int i = 0; i < 9; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    int topEdge = (int)(sampFactorH * i);   // 上边界
+                    int bottomEdge = (int)(sampFactorH * (i + 1));  // 下边界
+                    int leftEdge = (int)(sampFactorW * j);  // 左边界
+                    int rightEdge = (int)(sampFactorW * (j + 1)); // 右边界
+                    int count = 0;
+
+                    for (int ii = topEdge; ii < bottomEdge; ii++)
+                    {
+                        for (int jj = leftEdge; jj < rightEdge; jj++)
+                        {
+                            thumb[i * 8 + j] += grey[ii * width + jj];     // 亮度累积
+                            count++;
+                        }
+                    }
+                    thumb[i * 8 + j] /= count;    // 得出每块的平均亮度
+                }
+            }
+
+            /* 生成差分矩阵 */
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    dMatrix[i * 8 + j] = thumb[(i + 1) * 8 + j] - thumb[i * 8 + j];
+                }
+            }
+
+            /* 生成fingerprint */
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    if (dMatrix[i * 8 + j] >= 0)
+                    {
+                        fingerprint[i * 8 + j] = 1;
+                    }
+                    else
+                    {
+                        fingerprint[i * 8 + j] = 0;
+                    }
+                }
+            }
+
+            string fpStr = string.Join(",", fingerprint);   // 将fingerprint以逗号作为分隔符，排列成字符串
+            return fpStr;
+        }
     }
 }

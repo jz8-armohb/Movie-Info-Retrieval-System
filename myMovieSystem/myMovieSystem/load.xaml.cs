@@ -78,7 +78,8 @@ namespace myMovieSystem
 
                 /* 预留接口，为上载图像信息做准备 */
                 imageSearch imgSch = new imageSearch();
-                string imgInfo = imgSch.getGray(newPath[0]); // 获取图像的灰度信息
+                //string imgInfo = imgSch.getGray(newPath[0]); // 获取图像的灰度信息
+                string imgInfo = imgSch.dHashFingerprint(newPath[0]);   // dHash fingerprint（added by S.Z.Zheng）
 
                 MySqlConnection conn = new MySqlConnection(Conn);
                 conn.Open();
